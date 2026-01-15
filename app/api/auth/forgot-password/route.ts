@@ -14,29 +14,21 @@ export async function POST(req: Request) {
 
     const supabase = await createSupabaseServerClient();
 
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      email,
-      {
-        // 🔥 MUST MATCH SUPABASE AUTH SETTINGS
-        redirectTo:
-          "http://localhost:3000/reset-password/confirm",
-      }
-    );
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password/confirm`,
+    });
 
+    // 🔐 Security: real error expose mat karo
     if (error) {
       console.error("RESET PASSWORD ERROR:", error);
-      return NextResponse.json(
-        { message: error.message },
-        { status: 400 }
-      );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Password reset email sent",
+      message: "If the email exists, a reset link has been sent",
     });
   } catch (err) {
-    console.error("FORGOT PASSWORD SERVER ERROR:", err);
+    console.error("FORGOT PASSWORD ERROR:", err);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }

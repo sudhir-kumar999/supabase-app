@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link"; // ✅ ADD
+import Link from "next/link";
+import axios from "axios";
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
@@ -11,7 +12,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 🔥 ONLY FIX THAT WORKS
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -22,21 +22,18 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const { data } = await axios.post("/api/auth/login", {
+        email,
+        password,
+      });
 
-    const data = await res.json();
-    setLoading(false);
-
-    if (!res.ok) {
-      setError(data.message);
-      return;
+      window.location.replace("/");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-
-    window.location.replace("/");
   };
 
   return (
@@ -66,7 +63,6 @@ export default function LoginPage() {
         {loading ? "Logging in..." : "Login"}
       </button>
 
-      {/* ✅ FORGOT PASSWORD LINK (ONLY ADDITION) */}
       <Link
         href="/forgot-password"
         className="block text-center text-sm text-blue-600 hover:underline mt-4"
