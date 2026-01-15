@@ -62,7 +62,7 @@ export default function ResetPasswordConfirm() {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e:any) => {
     if (e.key === "Enter" && !loading && passwordsMatch) {
       handlePasswordReset();
     }
