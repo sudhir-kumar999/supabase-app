@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e:any) => {
     if (e.key === "Enter" && !loading) {
       sendResetLink();
     }
