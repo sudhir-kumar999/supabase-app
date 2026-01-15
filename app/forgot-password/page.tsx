@@ -7,25 +7,82 @@ export default function ForgotPasswordPage() {
   const supabase = createSupabaseBrowserClient();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
 
   const sendResetLink = async () => {
-    setLoading(true);
-    setMessage("");
+    if (!email) {
+      setError("Please enter your email address");
+      return;
+    }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${location.origin}/reset-password/confirm`,
-    });
+    setLoading(true);
+    setError("");
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
 
     setLoading(false);
 
-    if (error) {
-      setMessage(error.message);
+    if (resetError) {
+      setError(resetError.message);
     } else {
-      setMessage("✅ Password reset link sent. Check your email.");
+      setEmailSent(true);
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !loading) {
+      sendResetLink();
+    }
+  };
+
+  // Success state - email sent
+  if (emailSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+            Check Your Email
+          </h2>
+
+          <p className="text-gray-600 mb-6">
+            We've sent a password reset link to <strong>{email}</strong>
+          </p>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+            <p className="font-medium text-sm text-gray-700 mb-2">Next steps:</p>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+              <li>Check your email inbox</li>
+              <li>Click the reset password link</li>
+              <li>Set your new password</li>
+            </ol>
+          </div>
+
+          <p className="text-sm text-gray-500 mb-4">Didn't receive the email? Check your spam folder or try again.</p>
+
+          <button
+            onClick={() => {
+              setEmailSent(false);
+              setEmail("");
+            }}
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            ← Try another email
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Form state
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
@@ -45,10 +102,20 @@ export default function ForgotPasswordPage() {
             type="email"
             placeholder="you@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError("");
+            }}
+            onKeyPress={handleKeyPress}
             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+
+        {error && (
+          <p className="mt-3 text-sm text-red-600">
+            {error}
+          </p>
+        )}
 
         <button
           onClick={sendResetLink}
@@ -58,11 +125,14 @@ export default function ForgotPasswordPage() {
           {loading ? "Sending..." : "Send Reset Link"}
         </button>
 
-        {message && (
-          <p className="mt-4 text-center text-sm text-green-600">
-            {message}
-          </p>
-        )}
+        <div className="mt-6 text-center">
+          <a
+            href="/login"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            ← Back to Login
+          </a>
+        </div>
       </div>
     </div>
   );
