@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function SignupPage() {
   const [mounted, setMounted] = useState(false);
@@ -15,32 +16,26 @@ export default function SignupPage() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; // 🔥 hydration fix
+  if (!mounted) return null;
 
   const signup = async () => {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    try {
+      await axios.post("/api/auth/signup", {
         name,
         email,
         password,
         role: "user",
-      }),
-    });
+      });
 
-    setLoading(false);
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.message);
-      return;
+      window.location.href = "/login";
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
-
-    window.location.href = "/login";
   };
 
   return (
