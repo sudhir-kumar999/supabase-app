@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link"; // ✅ ADD
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
@@ -64,6 +65,14 @@ export default function LoginPage() {
       >
         {loading ? "Logging in..." : "Login"}
       </button>
+
+      {/* ✅ FORGOT PASSWORD LINK (ONLY ADDITION) */}
+      <Link
+        href="/forgot-password"
+        className="block text-center text-sm text-blue-600 hover:underline mt-4"
+      >
+        Forgot Password?
+      </Link>
 
       {error && (
         <p className="text-red-600 mt-4 text-center">{error}</p>
